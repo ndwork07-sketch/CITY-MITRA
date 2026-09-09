@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CITY MITRA - તમારા શહેરનો, તમારો મિત્ર</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Mukta for Gujarati & Inter for clean numbers -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Mukta', sans-serif;
+            background-color: #f3f4f6;
+            color: #12304A;
+        }
+        .bg-navy { background-color: #12304A; }
+        .text-navy { color: #12304A; }
+        .bg-teal-brand { background-color: #00A88F; }
+        .text-teal-brand { color: #00A88F; }
+        .border-teal-brand { border-color: #00A88F; }
+        .bg-yellow-brand { background-color: #FFC83D; }
+        .text-yellow-brand { color: #FFC83D; }
+        /* Hide scrollbars for clean mobile app look */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen bg-gray-900 m-0 p-0">
+
+    <!-- Mobile Device Container -->
+    <div id="app-container" class="w-full max-w-md h-[100vh] sm:h-[844px] bg-white sm:rounded-[36px] sm:shadow-2xl flex flex-col relative overflow-hidden">
+        
+        <!-- TOP STATUS BAR -->
+        <div class="bg-navy text-white px-6 py-2 text-xs flex justify-between items-center z-50">
+            <span id="current-time">11:33</span>
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-signal text-[10px]"></i>
+                <i class="fa-solid fa-wifi text-[10px]"></i>
+                <i class="fa-solid fa-battery-full text-[10px]"></i>
+            </div>
+        </div>
+
+        <!-- APP CONTENT AREA (Screens render here dynamically) -->
+        <div id="screen-viewport" class="flex-1 overflow-y-auto no-scrollbar relative flex flex-col bg-gray-50">
+            <!-- Dynamic Screen Injected Here -->
+        </div>
+
+        <!-- GLOBAL BOTTOM NAVIGATION (Rendered on main app screens) -->
+        <div id="bottom-nav" class="hidden bg-white border-t border-gray-200 py-2 px-4 justify-around items-center z-40 shadow-lg">
+            <button onclick="switchScreen('home')" class="nav-btn flex flex-col items-center text-teal-brand" data-screen="home">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">હોમ</span>
+            </button>
+            <button onclick="switchScreen('orders')" class="nav-btn flex flex-col items-center text-gray-400" data-screen="orders">
+                <i class="fa-solid fa-bag-shopping text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">ઓર્ડર</span>
+            </button>
+            <button onclick="switchScreen('rides')" class="nav-btn flex flex-col items-center text-gray-400" data-screen="rides">
+                <i class="fa-solid fa-car text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">રાઇડ્સ</span>
+            </button>
+            <button onclick="switchScreen('offers')" class="nav-btn flex flex-col items-center text-gray-400" data-screen="offers">
+                <i class="fa-solid fa-tags text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">ઓફર્સ</span>
+            </button>
+            <button onclick="switchScreen('profile')" class="nav-btn flex flex-col items-center text-gray-400" data-screen="profile">
+                <i class="fa-solid fa-user text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">પ્રોફાઇલ</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT APP CONTROLLER & SCREENS -->
+    <script>
+        // Global App State
+        const state = {
+            currentScreen: 'splash',
+            selectedCity: 'Talaja',
+            mobileNumber: '',
+            cart: [
+                { id: 1, name: 'શુદ્ધ સીંગતેલ (1 Ltr)', price: 160, qty: 1, shop: 'પાટીદાર જનરલ સ્ટોર' },
+                { id: 2, name: 'કાઠિયાવાડી ચા પત્તી (500g)', price: 210, qty: 1, shop: 'પાટીદાર જનરલ સ્ટોર' }
+            ],
+            orders: [
+                { id: 'CM-8921', type: 'ગ્રોસરી', shop: 'પાટીદાર જનરલ સ્ટોર', amount: 370, status: 'Out for Delivery', date: 'આજે, 10:45 AM' },
+                { id: 'CM-8845', type: 'ઓટો રાઇડ', shop: 'બસ સ્ટેન્ડ થી હોસ્પિટલ', amount: 50, status: 'Completed', date: 'ગઈકાલે' }
+            ],
+            activeRide: null
+        };
+
+        // Initialize App
+        window.onload = () => {
+            updateTime();
+            setInterval(updateTime, 60000);
+            switchScreen('splash');
+        };
+
+        function updateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('current-time').innerText = `${hours}:${minutes}`;
+        }
+
+        // Screen Router Controller
+        function switchScreen(screenName) {
+            state.currentScreen = screenName;
+            const viewport = document.getElementById('screen-viewport');
+            const bottomNav = document.getElementById('bottom-nav');
+
+            // Show/Hide Bottom Navigation based on screen
+            const hideNavScreens = ['splash', 'location', 'login', 'otp', 'checkout', 'payment', 'order-confirmation', 'live-tracking', 'driver-matching', 'live-ride', 'ride-completed'];
+            if (hideNavScreens.includes(screenName)) {
+                bottomNav.classList.add('hidden');
+            } else {
+                bottomNav.classList.remove('hidden');
+                updateBottomNavActive(screenName);
+            }
+
+            // Render Screen HTML
+            viewport.innerHTML = getScreenHTML(screenName);
+            viewport.scrollTop = 0;
+        }
+
+        function updateBottomNavActive(screen) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const s = btn.getAttribute('data-screen');
+                if (s === screen) {
+                    btn.classList.remove('text-gray-400');
+                    btn.classList.add('text-teal-brand');
+                } else {
+                    btn.classList.remove('text-teal-brand');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+        }
+
+        // Screen Templates Generator
+        function getScreenHTML(name) {
+            switch(name) {
+                case 'splash':
+                    return `
+                        <div class="flex-1 bg-navy flex flex-col justify-between items-center p-8 text-white text-center">
+                            <div></div>
+                            <div class="flex flex-col items-center">
+                                <!-- Logo Icon -->
+                                <div class="w-24 h-24 bg-teal-brand rounded-3xl flex items-center justify-center shadow-xl relative mb-6">
+                                    <i class="fa-solid fa-location-dot text-white text-4xl"></i>
+                                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-brand rounded-full flex items-center justify-center text-navy font-bold text-xs shadow">
+                                        <i class="fa-solid fa-smile"></i>
+                                    </div>
+                                </div>
+                                <h1 class="text-3xl font-bold tracking-wider mb-2">CITY MITRA</h1>
+                                <p class="text-yellow-brand text-lg font-medium">“તમારા શહેરનો, તમારો મિત્ર.”</p>
+                            </div>
+                            <button onclick="switchScreen('location')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:bg-teal-600 transition">
+                                આગળ વધો <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    `;
+
+                case 'location':
+                    return `
+                        <div class="flex-1 p-6 flex flex-col justify-between bg-white">
+                            <div>
+                                <div class="flex items-center justify-between mb-8">
+                                    <button onclick="switchScreen('splash')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <span class="font-bold text-gray-500 text-sm">સ્ટેપ 1/2</span>
+                                </div>
+                                <h2 class="text-2xl font-bold text-navy mb-2">તમારું શહેર પસંદ કરો</h2>
+                                <p class="text-gray-500 text-sm mb-6">તમારા સ્થાનિક વિસ્તારની શ્રેષ્ઠ સેવાઓ મેળવવા માટે.</p>
+                                
+                                <div class="space-y-3">
+                                    <div onclick="state.selectedCity='Talaja'; switchScreen('login')" class="p-4 border-2 border-teal-brand bg-teal-50 rounded-2xl flex items-center justify-between cursor-pointer shadow-sm">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-teal-brand text-white rounded-xl flex items-center justify-center"><i class="fa-solid fa-location-dot"></i></div>
+                                            <div>
+                                                <h4 class="font-bold text-navy">📍 તલાજા (Talaja)</h4>
+                                                <p class="text-xs text-gray-500">પ્રાઇમરી લોકેશન - બધી સેવાઓ ઉપલબ્ધ</p>
+                                            </div>
+                                        </div>
+                                        <i class="fa-solid fa-circle-check text-teal-brand text-xl"></i>
+                                    </div>
+                                    <div onclick="state.selectedCity='Bhavnagar'; switchScreen('login')" class="p-4 border border-gray-200 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-50">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-gray-200 text-gray-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-city"></i></div>
+                                            <div>
+                                                <h4 class="font-bold text-navy">ભાવનગર (Bhavnagar)</h4>
+                                                <p class="text-xs text-gray-500">ટૂંક સમયમાં શરૂ થઈ રહ્યું છે</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div onclick="state.selectedCity='Mahuva'; switchScreen('login')" class="p-4 border border-gray-200 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-gray-50">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-gray-200 text-gray-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-city"></i></div>
+                                            <div>
+                                                <h4 class="font-bold text-navy">મહુવા (Mahuva)</h4>
+                                                <p class="text-xs text-gray-500">ટૂંક સમયમાં શરૂ થઈ રહ્યું છે</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="switchScreen('login')" class="w-full bg-navy text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                આગળ વધો
+                            </button>
+                        </div>
+                    `;
+
+                case 'login':
+                    return `
+                        <div class="flex-1 p-6 flex flex-col justify-between bg-white">
+                            <div>
+                                <button onclick="switchScreen('location')" class="text-navy text-lg mb-8"><i class="fa-solid fa-arrow-left"></i></button>
+                                <h2 class="text-2xl font-bold text-navy mb-2">લોગિન અથવા સાઇન અપ</h2>
+                                <p class="text-gray-500 text-sm mb-8">ઓર્ડર અને રાઇડ બુક કરવા માટે તમારો મોબાઈલ નંબર દાખલ કરો.</p>
+                                
+                                <label class="block text-xs font-bold text-gray-600 mb-2">મોબાઈલ નંબર</label>
+                                <div class="flex items-center border border-gray-300 rounded-2xl px-4 py-3 bg-gray-50 focus-within:border-teal-brand">
+                                    <span class="font-bold text-gray-700 mr-3">+91</span>
+                                    <input type="tel5" id="phone-input" placeholder="98765 43210" maxlength="10" class="w-full bg-transparent outline-none font-medium text-navy text-lg" value="${state.mobileNumber}">
+                                </div>
+                            </div>
+                            <button onclick="state.mobileNumber = document.getElementById('phone-input').value || '9876543210'; switchScreen('otp');" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                OTP મેળવો
+                            </button>
+                        </div>
+                    `;
+
+                case 'otp':
+                    return `
+                        <div class="flex-1 p-6 flex flex-col justify-between bg-white">
+                            <div>
+                                <button onclick="switchScreen('login')" class="text-navy text-lg mb-8"><i class="fa-solid fa-arrow-left"></i></button>
+                                <h2 class="text-2xl font-bold text-navy mb-2">OTP વેરિફિકેશન</h2>
+                                <p class="text-gray-500 text-sm mb-8">અમે +91 <span class="font-bold text-navy">${state.mobileNumber}</span> પર 4 અંકનો કોડ મોકલ્યો છે.</p>
+                                
+                                <div class="flex justify-between space-x-3 mb-6">
+                                    <input type="text" maxlength="1" value="4" class="w-14 h-14 text-center text-xl font-bold border-2 border-teal-brand rounded-2xl bg-teal-50 outline-none">
+                                    <input type="text" maxlength="1" value="8" class="w-14 h-14 text-center text-xl font-bold border-2 border-gray-200 rounded-2xl outline-none">
+                                    <input type="text" maxlength="1" value="2" class="w-14 h-14 text-center text-xl font-bold border-2 border-gray-200 rounded-2xl outline-none">
+                                    <input type="text" maxlength="1" value="9" class="w-14 h-14 text-center text-xl font-bold border-2 border-gray-200 rounded-2xl outline-none">
+                                </div>
+                                <p class="text-xs text-gray-400 text-center">કોડ નથી મળ્યો? <span class="text-teal-brand font-bold cursor-pointer">ફરી મોકલો</span></p>
+                            </div>
+                            <button onclick="switchScreen('home')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                વેરિફાઈ અને લોગિન કરો
+                            </button>
+                        </div>
+                    `;
+
+                case 'home':
+                    return `
+                        <div class="flex-1 pb-24">
+                            <!-- Top Header -->
+                            <div class="bg-navy text-white px-6 pt-4 pb-6 rounded-b-[30px] shadow-md">
+                                <div class="flex justify-between items-center mb-4">
+                                    <div class="flex items-center space-x-2 cursor-pointer" onclick="switchScreen('location')">
+                                        <i class="fa-solid fa-location-dot text-teal-brand text-lg"></i>
+                                        <div>
+                                            <p class="text-[10px] text-gray-300">વર્તમાન લોકેશન</p>
+                                            <h3 class="font-bold text-sm flex items-center">${state.selectedCity} <i class="fa-solid fa-angle-down ml-1 text-xs"></i></h3>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div onclick="switchScreen('cart')" class="relative bg-white/10 p-2.5 rounded-full cursor-pointer">
+                                            <i class="fa-solid fa-cart-shopping text-white text-sm"></i>
+                                            <span class="absolute -top-1 -right-1 bg-yellow-brand text-navy text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">${state.cart.length}</span>
+                                        </div>
+                                        <div onclick="switchScreen('profile')" class="w-9 h-9 bg-teal-brand rounded-full flex items-center justify-center font-bold text-sm">ND</div>
+                                    </div>
+                                </div>
+                                <!-- Search Bar -->
+                                <div onclick="switchScreen('search')" class="bg-white text-gray-500 rounded-2xl px-4 py-3 flex items-center space-x-3 shadow cursor-pointer">
+                                    <i class="fa-solid fa-magnifying-glass text-teal-brand"></i>
+                                    <span class="text-sm font-medium">શું શોધવું છે? (કરિયાણું, ફૂડ, ઓટો...)</span>
+                                </div>
+                            </div>
+
+                            <!-- Main Body Content -->
+                            <div class="px-6 mt-6">
+                                <!-- Banner Slider Card -->
+                                <div class="bg-gradient-to-r from-teal-brand to-emerald-600 rounded-3xl p-5 text-white shadow-lg mb-6 relative overflow-hidden">
+                                    <div class="absolute right-[-20px] bottom-[-20px] opacity-20 text-9xl"><i class="fa-solid fa-store"></i></div>
+                                    <span class="bg-yellow-brand text-navy text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">ખાસ ઓફર</span>
+                                    <h2 class="text-xl font-bold mt-2">તલાજાની તમામ દુકાનો હવે ઓનલાઈન!</h2>
+                                    <p class="text-xs text-white/90 mt-1 mb-4">પહેલા ઓર્ડર પર મેળવો ફ્રી ડિલિવરી અને ₹૫૦ છૂટ.</p>
+                                    <button onclick="switchScreen('shop-list')" class="bg-white text-teal-brand font-bold text-xs px-4 py-2 rounded-xl shadow">શોપ જુઓ</button>
+                                </div>
+
+                                <!-- Service Grid -->
+                                <h3 class="font-bold text-navy text-base mb-4">અમારી સેવાઓ (Services)</h3>
+                                <div class="grid grid-cols-4 gap-4 mb-6">
+                                    <div onclick="switchScreen('category')" class="flex flex-col items-center cursor-pointer">
+                                        <div class="w-14 h-14 bg-teal-50 text-teal-brand rounded-2xl flex items-center justify-center text-xl shadow-sm mb-1.5 border border-teal-100"><i class="fa-solid fa-basket-shopping"></i></div>
+                                        <span class="text-xs font-semibold text-gray-700">ગ્રોસરી</span>
+                                    </div>
+                                    <div onclick="switchScreen('food')" class="flex flex-col items-center cursor-pointer">
+                                        <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center text-xl shadow-sm mb-1.5 border border-orange-100"><i class="fa-solid fa-utensils"></i></div>
+                                        <span class="text-xs font-semibold text-gray-700">ફૂડ</span>
+                                    </div>
+                                    <div onclick="switchScreen('auto')" class="flex flex-col items-center cursor-pointer">
+                                        <div class="w-14 h-14 bg-yellow-50 text-amber-600 rounded-2xl flex items-center justify-center text-xl shadow-sm mb-1.5 border border-yellow-100"><i class="fa-solid fa-taxi"></i></div>
+                                        <span class="text-xs font-semibold text-gray-700">ઓટો</span>
+                                    </div>
+                                    <div onclick="switchScreen('car')" class="flex flex-col items-center cursor-pointer">
+                                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-sm mb-1.5 border border-blue-100"><i class="fa-solid fa-car-side"></i></div>
+                                        <span class="text-xs font-semibold text-gray-700">કાર કેબ</span>
+                                    </div>
+                                    <div onclick="switchScreen('parcel')" class="flex flex-col items-center cursor-pointer">
+                                        <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl shadow-sm mb-1.5 border border-purple-100"><i class="fa-solid fa-box-archive"></i></div>
+                                        <span class="text-xs font-semibold text-gray-700">પાર્સલ</span>
+                                    </div>
+                                    <div onclick="switchScreen('shop-list')" class="flex flex-col items-center cursor-pointer">
+                                        <div class="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-xl shadow-sm mb-1.5 border border-rose-100"><i class="fa-solid fa-shop"></i></div>
+                                        <span class="text-xs font-semibold text-gray-700">લોકલ શોપ</span>
+                                    </div>
+                                    <div onclick="switchScreen('category')" class="flex flex-col items-center cursor-pointer">
+                                        <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl shadow-sm mb-1.5 border border-emerald-100"><i class="fa-solid fa-pills"></i></div>
+                                        <span class="text-xs font-semibold text-gray-700">મેડિસિન</span>
+                                    </div>
+                                    <div onclick="switchScreen('offers')" class="flex flex-col items-center cursor-pointer">
+                                        <div class="w-14 h-14 bg-pink-50 text-pink-600 rounded-2xl flex items-center justify-center text-xl shadow-sm mb-1.5 border border-pink-100"><i class="fa-solid fa-gift"></i></div>
+                                        <span class="text-xs font-semibold text-gray-700">ઓફર્સ</span>
+                                    </div>
+                                </div>
+
+                                <!-- Popular Near You -->
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-bold text-navy text-base">નજીકની લોકપ્રિય દુકાનો</h3>
+                                    <span onclick="switchScreen('shop-list')" class="text-xs font-bold text-teal-brand cursor-pointer">બ બધું જુઓ</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div onclick="switchScreen('shop-details')" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4 cursor-pointer">
+                                        <div class="w-16 h-16 bg-teal-100 text-teal-brand rounded-xl flex items-center justify-center font-bold text-xl"><i class="fa-solid fa-store"></i></div>
+                                        <div class="flex-1">
+                                            <div class="flex justify-between items-start">
+                                                <h4 class="font-bold text-navy text-sm">પાટીદાર જનરલ સ્ટોર</h4>
+                                                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">૪.૮ ★</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-0.5">કરિયાણું અને ડેઈલી નીડ્સ</p>
+                                            <div class="flex items-center justify-between mt-2 text-[11px] text-gray-400">
+                                                <span>📍 મેઈન બજાર, તલાજા</span>
+                                                <span class="font-bold text-teal-brand">૧૦-૧૫ મિનિટ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div onclick="switchScreen('shop-details')" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4 cursor-pointer">
+                                        <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center font-bold text-xl"><i class="fa-solid fa-utensils"></i></div>
+                                        <div class="flex-1">
+                                            <div class="flex justify-between items-start">
+                                                <h4 class="font-bold text-navy text-sm">કાઠિયાવાડી રેસ્ટોરન્ટ & ડાઈનિંગ</h4>
+                                                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">૪.૬ ★</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-0.5">શુદ્ધ ગુજરાતી ભોજન અને નાસ્તો</p>
+                                            <div class="flex items-center justify-between mt-2 text-[11px] text-gray-400">
+                                                <span>📍 સ્ટેશન રોડ, તલાજા</span>
+                                                <span class="font-bold text-teal-brand">૨૦ મિનિટ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'search':
+                    return `
+                        <div class="flex-1 bg-white p-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                <div class="flex-1 bg-gray-100 rounded-2xl px-4 py-2.5 flex items-center space-x-3">
+                                    <i class="fa-solid fa-magnifying-glass text-teal-brand"></i>
+                                    <input type="text" placeholder="ગ્રોસરી, દુકાન કે ફૂડ શોધો..." autofocus class="w-full bg-transparent outline-none text-sm text-navy">
+                                </div>
+                            </div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">તાજેતરની શોધ (Recent Searches)</h4>
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-xl">સીંગતેલ</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-xl">ચા પત્તી</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-xl">ઓટો રાઇડ</span>
+                            </div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">લોકપ્રિય શ્રેણીઓ</h4>
+                            <div class="space-y-2">
+                                <div onclick="switchScreen('category')" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer">
+                                    <span class="font-semibold text-sm text-navy">દાળ અને ચોખા (Rice & Dal)</span>
+                                    <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                                </div>
+                                <div onclick="switchScreen('category')" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer">
+                                    <span class="font-semibold text-sm text-navy">મસાલા અને તેલ</span>
+                                    <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'category':
+                    return `
+                        <div class="flex-1 bg-white p-6 pb-24">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <h2 class="text-xl font-bold text-navy">ગ્રોસરી અને દૈનિક જરૂરિયાત</h2>
+                                </div>
+                                <div onclick="switchScreen('cart')" class="relative bg-gray-100 p-2.5 rounded-full cursor-pointer">
+                                    <i class="fa-solid fa-cart-shopping text-navy text-sm"></i>
+                                    <span class="absolute -top-1 -right-1 bg-yellow-brand text-navy text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">${state.cart.length}</span>
+                                </div>
+                            </div>
+
+                            <!-- Filter Pills -->
+                            <div class="flex space-x-2 overflow-x-auto no-scrollbar mb-6 pb-1">
+                                <span class="bg-teal-brand text-white text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap">બધા જ</span>
+                                <span class="bg-gray-100 text-gray-600 text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap">તેલ અને ઘી</span>
+                                <span class="bg-gray-100 text-gray-600 text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap">ચા અને નાસ્તો</span>
+                                <span class="bg-gray-100 text-gray-600 text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap">મસાલા</span>
+                            </div>
+
+                            <!-- Product Cards Grid -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div onclick="switchScreen('product-details')" class="bg-gray-50 p-3 rounded-2xl border border-gray-100 flex flex-col justify-between cursor-pointer">
+                                    <div>
+                                        <div class="w-full h-28 bg-amber-100 rounded-xl flex items-center justify-center text-amber-700 font-bold text-2xl mb-3"><i class="fa-solid fa-bottle-droplet"></i></div>
+                                        <h4 class="font-bold text-navy text-sm mb-1">શુદ્ધ સીંગતેલ (1 Ltr)</h4>
+                                        <p class="text-[11px] text-gray-400">પાટીદાર સ્ટોર</p>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="font-bold text-teal-brand text-base">₹160</span>
+                                        <button onclick="event.stopPropagation(); alert('કાર્ટમાં ઉમેરાયું!');" class="bg-teal-brand text-white w-8 h-8 rounded-xl flex items-center justify-center shadow"><i class="fa-solid fa-plus text-xs"></i></button>
+                                    </div>
+                                </div>
+
+                                <div onclick="switchScreen('product-details')" class="bg-gray-50 p-3 rounded-2xl border border-gray-100 flex flex-col justify-between cursor-pointer">
+                                    <div>
+                                        <div class="w-full h-28 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 font-bold text-2xl mb-3"><i class="fa-solid fa-mug-hot"></i></div>
+                                        <h4 class="font-bold text-navy text-sm mb-1">કાઠિયાવાડી ચા પત્તી</h4>
+                                        <p class="text-[11px] text-gray-400">500g પૅક</p>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="font-bold text-teal-brand text-base">₹210</span>
+                                        <button onclick="event.stopPropagation(); alert('કાર્ટમાં ઉમેરાયું!');" class="bg-teal-brand text-white w-8 h-8 rounded-xl flex items-center justify-center shadow"><i class="fa-solid fa-plus text-xs"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'shop-list':
+                    return `
+                        <div class="flex-1 bg-white p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                <h2 class="text-xl font-bold text-navy">તલાજાની સ્થાનિક દુકાનો</h2>
+                            </div>
+                            <div class="space-y-4">
+                                <div onclick="switchScreen('shop-details')" class="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center space-x-4 cursor-pointer">
+                                    <div class="w-16 h-16 bg-teal-brand text-white rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-store"></i></div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-center"><h4 class="font-bold text-navy">પાટીદાર જનરલ સ્ટોર</h4><span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">ઓપન છે</span></div>
+                                        <p class="text-xs text-gray-500 mt-1">કરિયાણું, અનાજ અને ડેઈલી નીડ્સ</p>
+                                        <p class="text-[11px] text-teal-brand font-semibold mt-1">📍 મેઈન બજાર (0.8 km)</p>
+                                    </div>
+                                </div>
+                                <div onclick="switchScreen('shop-details')" class="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center space-x-4 cursor-pointer">
+                                    <div class="w-16 h-16 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-utensils"></i></div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-center"><h4 class="font-bold text-navy">કાઠિયાવાડી રેસ્ટોરન્ટ</h4><span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">ઓપન છે</span></div>
+                                        <p class="text-xs text-gray-500 mt-1">ફૂડ & સ્નેક્સ</p>
+                                        <p class="text-[11px] text-teal-brand font-semibold mt-1">📍 સ્ટેશન રોડ (1.2 km)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'shop-details':
+                    return `
+                        <div class="flex-1 bg-white flex flex-col">
+                            <div class="bg-navy text-white p-6 relative">
+                                <button onclick="switchScreen('shop-list')" class="text-white text-lg mb-4"><i class="fa-solid fa-arrow-left"></i></button>
+                                <h2 class="text-2xl font-bold">પાટીદાર જનરલ સ્ટોર</h2>
+                                <p class="text-xs text-gray-300 mt-1">મેઈન બજાર, તલાજા • ૪.૮ ★ (120+ રિવ્યુ)</p>
+                            </div>
+                            <div class="p-6 flex-1 bg-gray-50 pb-24">
+                                <h3 class="font-bold text-navy mb-3">ઉપલબ્ધ વસ્તુઓ</h3>
+                                <div class="space-y-3">
+                                    <div class="bg-white p-3 rounded-xl flex items-center justify-between shadow-sm">
+                                        <div>
+                                            <h4 class="font-bold text-sm text-navy">શુદ્ધ સીંગતેલ (1 Ltr)</h4>
+                                            <p class="text-xs font-bold text-teal-brand mt-1">₹160</p>
+                                        </div>
+                                        <button onclick="alert('કાર્ટમાં ઉમેરાયું!');" class="bg-teal-brand text-white px-4 py-2 rounded-xl text-xs font-bold shadow">ઉમેરો</button>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-xl flex items-center justify-between shadow-sm">
+                                        <div>
+                                            <h4 class="font-bold text-sm text-navy">કાઠિયાવાડી ચા પત્તી (500g)</h4>
+                                            <p class="text-xs font-bold text-teal-brand mt-1">₹210</p>
+                                        </div>
+                                        <button onclick="alert('કાર્ટમાં ઉમેરાયું!');" class="bg-teal-brand text-white px-4 py-2 rounded-xl text-xs font-bold shadow">ઉમેરો</button>
+                                    </div>
+                                </div>
+                                <button onclick="switchScreen('cart')" class="w-full mt-6 bg-yellow-brand text-navy font-bold py-3.5 rounded-2xl shadow">કાર્ટ જુઓ (${state.cart.length} આઈટમ)</button>
+                            </div>
+                        </div>
+                    `;
+
+                case 'product-details':
+                    return `
+                        <div class="flex-1 bg-white flex flex-col justify-between p-6">
+                            <div>
+                                <button onclick="switchScreen('category')" class="text-navy text-lg mb-4"><i class="fa-solid fa-arrow-left"></i></button>
+                                <div class="w-full h-48 bg-amber-100 rounded-3xl flex items-center justify-center text-amber-700 text-6xl mb-6 shadow-inner"><i class="fa-solid fa-bottle-droplet"></i></div>
+                                <h2 class="text-2xl font-bold text-navy mb-1">શુદ્ધ સીંગતેલ (1 Ltr)</h2>
+                                <p class="text-xs text-gray-400 mb-4">પાટીદાર જનરલ સ્ટોર, તલાજા</p>
+                                <div class="text-2xl font-bold text-teal-brand mb-4">₹160 <span class="text-xs text-gray-400 line-through font-normal ml-2">₹180</span></div>
+                                <p class="text-sm text-gray-600 mb-6">૧૦૦% શુદ્ધ અને ગુણવત્તાસભર સીંગતેલ, જે તલાજામાં સીધું તમારા ઘર સુધી પહોંચાડવામાં આવે છે.</p>
+                            </div>
+                            <button onclick="alert('સફળતાપૂર્વક કાર્ટમાં ઉમેરાયું!'); switchScreen('cart');" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                કાર્ટમાં ઉમેરો
+                            </button>
+                        </div>
+                    `;
+
+                case 'cart':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <h2 class="text-xl font-bold text-navy">તમારું કાર્ટ (Cart)</h2>
+                                </div>
+                                <div class="space-y-3 mb-6">
+                                    ${state.cart.map(item => `
+                                        <div class="bg-gray-50 p-4 rounded-2xl flex items-center justify-between border border-gray-100">
+                                            <div>
+                                                <h4 class="font-bold text-sm text-navy">${item.name}</h4>
+                                                <p class="text-xs text-gray-400">${item.shop}</p>
+                                                <p class="text-sm font-bold text-teal-brand mt-1">₹${item.price}</p>
+                                            </div>
+                                            <div class="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-xl border">
+                                                <span class="font-bold text-sm">${item.qty}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-2xl space-y-2 text-sm">
+                                    <div class="flex justify-between text-gray-600"><span>સબટોટલ</span><span class="font-bold">₹370</span></div>
+                                    <div class="flex justify-between text-gray-600"><span>ડિલિવરી ચાર્જ</span><span class="font-bold text-emerald-600">ફ્રી</span></div>
+                                    <div class="border-t pt-2 flex justify-between font-bold text-navy text-base"><span>કુલ રકમ</span><span>₹370</span></div>
+                                </div>
+                            </div>
+                            <button onclick="switchScreen('checkout')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                ઓર્ડર કન્ફર્મ કરો
+                            </button>
+                        </div>
+                    `;
+
+                case 'checkout':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <button onclick="switchScreen('cart')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <h2 class="text-xl font-bold text-navy">ડિલિવરી સરનામું</h2>
+                                /></div>
+                                <div class="bg-teal-50 border-2 border-teal-brand p-4 rounded-2xl mb-6">
+                                    <div class="flex items-center space-x-2 text-teal-brand font-bold mb-1"><i class="fa-solid fa-house"></i> <span>ઘરનું સરનામું (Home)</span></div>
+                                    <p class="text-xs text-gray-600">સોસાયટી નંબર ૪, મેઈન રોડ પાસે, તલાજા - 364140</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-2xl cursor-pointer text-center border border-dashed border-gray-300">
+                                    <span class="text-xs font-bold text-teal-brand">+ નવું સરનામું ઉમેરો</span>
+                                </div>
+                            </div>
+                            <button onclick="switchScreen('payment')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                પેમેન્ટ પર જાઓ
+                            </button>
+                        </div>
+                    `;
+
+                case 'payment':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <button onclick="switchScreen('checkout')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <h2 class="text-xl font-bold text-navy">પેમેન્ટ પદ્ધતિ</h2>
+                                </div>
+                                <div class="space-y-3">
+                                    <label class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border-2 border-teal-brand cursor-pointer">
+                                        <div class="flex items-center space-x-3"><i class="fa-solid fa-money-bill-wave text-teal-brand text-xl"></i><span class="font-bold text-sm text-navy">Cash on Delivery (કેશ ઓન ડિલિવરી)</span></div>
+                                        <input type="radio" checked name="pay" class="accent-teal-brand">
+                                    </label>
+                                    <label class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200 cursor-pointer">
+                                        <div class="flex items-center space-x-3"><i class="fa-solid fa-qrcode text-purple-600 text-xl"></i><span class="font-bold text-sm text-navy">UPI (Google Pay / PhonePe / Paytm)</span></div>
+                                        <input type="radio" name="pay" class="accent-teal-brand">
+                                    </label>
+                                </div>
+                            </div>
+                            <button onclick="switchScreen('order-confirmation')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                ઓર્ડર પ્લેસ કરો (₹370)
+                            </button>
+                        </div>
+                    `;
+
+                case 'order-confirmation':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-center items-center text-center">
+                            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner animate-bounce"><i class="fa-solid fa-check"></i></div>
+                            <h2 class="text-2xl font-bold text-navy mb-2">ઓર્ડર સફળતાપૂર્વક થઈ ગયો!</h2>
+                            <p class="text-xs text-gray-500 mb-6">ઓર્ડર નંબર: <span class="font-bold text-navy">#CM-8921</span><br>તલાજાના પાર્ટનર દ્વારા ૧૦-૧૫ મિનિટમાં ડિલિવરી થશે.</p>
+                            <button onclick="switchScreen('live-tracking')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow mb-3">
+                                લાઇવ ઓર્ડર ટ્રેક કરો
+                            </button>
+                            <button onclick="switchScreen('home')" class="w-full bg-gray-100 text-navy py-3 rounded-2xl font-bold text-sm">
+                                હોમ પેજ પર જાઓ
+                            </button>
+                        </div>
+                    `;
+
+                case 'live-tracking':
+                    return `
+                        <div class="flex-1 bg-white flex flex-col justify-between">
+                            <div class="bg-navy text-white p-6">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <button onclick="switchScreen('home')" class="text-white text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <h2 class="text-lg font-bold">ઓર્ડર ટ્રેકિંગ (#CM-8921)</h2>
+                                </div>
+                                <p class="text-xs text-teal-brand font-semibold">અંદાજિત સમય: ૧૦ મિનિટ</p>
+                            </div>
+                            <div class="flex-1 bg-gray-100 relative flex items-center justify-center">
+                                <div class="text-center p-6">
+                                    <div class="w-24 h-24 bg-teal-100 text-teal-brand rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow animate-pulse"><i class="fa-solid fa-person-biking"></i></div>
+                                    <h4 class="font-bold text-navy text-base">ડિલિવરી બોય રસ્તામાં છે</h4>
+                                    <p class="text-xs text-gray-500 mt-1">પાટીદાર જનરલ સ્ટોરથી તમારો ઓર્ડર નીકળી ગયો છે.</p>
+                                </div>
+                            </div>
+                            <div class="p-6 bg-white border-t">
+                                <button onclick="switchScreen('home')" class="w-full bg-navy text-white py-3.5 rounded-2xl font-bold shadow">હોમ પર પાછા જાઓ</button>
+                            </div>
+                        </div>
+                    `;
+
+                case 'auto':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <h2 class="text-xl font-bold text-navy">ઓટો-રિક્ષા બુકિંગ</h2>
+                                </div>
+                                <div class="space-y-4 mb-6">
+                                    <div class="bg-gray-50 p-4 rounded-2xl border flex items-center space-x-3">
+                                        <i class="fa-solid fa-circle-dot text-teal-brand"></i>
+                                        <input type="text" value="તલાજા બસ સ્ટેન્ડ" class="w-full bg-transparent outline-none font-medium text-sm text-navy">
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-2xl border flex items-center space-x-3">
+                                        <i class="fa-solid fa-location-dot text-rose-500"></i>
+                                        <input type="text" placeholder="ક્યાં જવું છે? (ડ્રોપ લોકેશન)" class="w-full bg-transparent outline-none font-medium text-sm text-navy">
+                                    </div>
+                                </div>
+                                <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-bold text-navy text-sm">CITY MITRA Auto</h4>
+                                        <p class="text-xs text-gray-500 mt-0.5">ઝડપી અને સસ્તું ભાડું</p>
+                                    </div>
+                                    <span class="text-lg font-bold text-teal-brand">₹50</span>
+                                </div>
+                            </div>
+                            <button onclick="switchScreen('driver-matching')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                ઓટો બુક કરો
+                            </button>
+                        </div>
+                    `;
+
+                case 'car':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <h2 class="text-xl font-bold text-navy">કાર / કેબ બુકિંગ</h2>
+                                </div>
+                                <div class="space-y-4 mb-6">
+                                    <div class="bg-gray-50 p-4 rounded-2xl border flex items-center space-x-3">
+                                        <i class="fa-solid fa-circle-dot text-teal-brand"></i>
+                                        <input type="text" value="તલાજા સિટી સેન્ટર" class="w-full bg-transparent outline-none font-medium text-sm text-navy">
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-2xl border flex items-center space-x-3">
+                                        <i class="fa-solid fa-location-dot text-rose-500"></i>
+                                        <input type="text" placeholder="ભાવનગર રેલવે સ્ટેશન / અન્ય શહેર" class="w-full bg-transparent outline-none font-medium text-sm text-navy">
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-bold text-navy text-sm">Sedan / XL6 Cab</h4>
+                                        <p class="text-xs text-gray-500 mt-0.5">આરામદાયક મુસાફરી</p>
+                                    </div>
+                                    <span class="text-lg font-bold text-teal-brand">₹550</span>
+                                </div>
+                            </div>
+                            <button onclick="switchScreen('driver-matching')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                કેબ બુક કરો
+                            </button>
+                        </div>
+                    `;
+
+                case 'driver-matching':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-center items-center text-center">
+                            <div class="w-24 h-24 bg-teal-100 text-teal-brand rounded-full flex items-center justify-center text-4xl mb-6 shadow animate-spin"><i class="fa-solid fa-radar"></i></div>
+                            <h2 class="text-2xl font-bold text-navy mb-2">નજીકના ડ્રાઈવરની શોધ થઈ રહી છે...</h2>
+                            <p class="text-xs text-gray-500 mb-8">કૃપા કરીને થોડી રાહ જુઓ, તલાજામાં ડ્રાઈવર કનેક્ટ થઈ રહ્યો છે.</p>
+                            <button onclick="switchScreen('live-ride')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                ડ્રાઈવર મળી ગયો (ટેસ્ટ કરો)
+                            </button>
+                        </div>
+                    `;
+
+                case 'live-ride':
+                    return `
+                        <div class="flex-1 bg-white flex flex-col justify-between">
+                            <div class="bg-navy text-white p-6">
+                                <h2 class="text-lg font-bold">રાઇડ ચાલુ છે</h2>
+                                <p class="text-xs text-teal-brand font-semibold">ડ્રાઈવર તમારી તરફ આવી રહ્યા છે</p>
+                            </div>
+                            <div class="p-6">
+                                <div class="bg-gray-50 p-4 rounded-2xl border mb-4 flex items-center space-x-4">
+                                    <div class="w-14 h-14 bg-teal-brand text-white rounded-xl flex items-center justify-center font-bold text-xl">મ.</div>
+                                    <div>
+                                        <h4 class="font-bold text-navy">મહેશભાઈ (ડ્રાઈવર)</h4>
+                                        <p class="text-xs text-gray-500">GJ-04-AB-1234 • ૪.૯ ★</p>
+                                    </div>
+                                </div>
+                                <button onclick="switchScreen('ride-completed')" class="w-full bg-rose-500 text-white py-3.5 rounded-2xl font-bold shadow">રાઇડ પૂર્ણ કરો</button>
+                            </div>
+                        </div>
+                    `;
+
+                case 'ride-completed':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-center items-center text-center">
+                            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mb-6"><i class="fa-solid fa-star"></i></div>
+                            <h2 class="text-2xl font-bold text-navy mb-2">રાઇડ સફળતાપૂર્વક પૂર્ણ!</h2>
+                            <p class="text-xs text-gray-500 mb-6">કુલ ભાડું: <span class="font-bold text-navy">₹50</span></p>
+                            <button onclick="switchScreen('home')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                હોમ પેજ પર જાઓ
+                            </button>
+                        </div>
+                    `;
+
+                case 'parcel':
+                    return `
+                        <div class="flex-1 bg-white p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <h2 class="text-xl font-bold text-navy">પાર્સલ ડિલિવરી</h2>
+                                </div>
+                                <div class="space-y-4 mb-6">
+                                    <input type="text" placeholder="પિક-અપ સરનામું (તલાજા)" class="w-full bg-gray-50 p-4 rounded-2xl border text-sm outline-none">
+                                    <input type="text" placeholder="ડ્રોપ સરનામું" class="w-full bg-gray-50 p-4 rounded-2xl border text-sm outline-none">
+                                </div>
+                            </div>
+                            <button onclick="alert('પાર્સલ પિક-અપ બુક થઈ ગયું છે!'); switchScreen('home');" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow">
+                                પાર્સલ બુક કરો
+                            </button>
+                        </div>
+                    `;
+
+                case 'food':
+                    return `
+                        <div class="flex-1 bg-white p-6 pb-24">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                <h2 class="text-xl font-bold text-navy">ફૂડ અને રેસ્ટોરન્ટ</h2>
+                            </div>
+                            <div class="space-y-4">
+                                <div onclick="switchScreen('shop-details')" class="bg-gray-50 p-4 rounded-2xl border cursor-pointer">
+                                    <h4 class="font-bold text-navy">કાઠિયાવાડી ડાઈનિંગ & રેસ્ટોરન્ટ</h4>
+                                    <p class="text-xs text-gray-500 mt-1">સ્ટેશન રોડ, તલાજા • ગુજરાતી થાળી, નાસ્તો</p>
+                                    <span class="inline-block mt-2 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">૪.૬ ★</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'offers':
+                    return `
+                        <div class="flex-1 bg-white p-6 pb-24">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
+                                <h2 class="text-xl font-bold text-navy">ખાસ ઓફર્સ અને કૂપન</h2>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="bg-gradient-to-r from-teal-brand to-emerald-600 p-5 rounded-2xl text-white shadow">
+                                    <span class="bg-yellow-brand text-navy text-[10px] font-bold px-2 py-0.5 rounded uppercase">WELCOME50</span>
+                                    <h3 class="font-bold text-lg mt-2">પહેલા ઓર્ડર પર ₹૫૦ છૂટ</h3>
+                                    <p class="text-xs text-white/90 mt-1">તલાજાના કોઈપણ ગ્રોસરી ઓર્ડર પર લાગુ.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'orders':
+                    return `
+                        <div class="flex-1 bg-white p-6 pb-24">
+                            <h2 class="text-xl font-bold text-navy mb-6">તમારા ઓર્ડર ઇતિહાસ</h2>
+                            <div class="space-y-3">
+                                ${state.orders.map(o => `
+                                    <div class="bg-gray-50 p-4 rounded-2xl border">
+                                        <div class="flex justify-between items-center mb-1"><h4 class="font-bold text-sm text-navy">${o.type} - ${o.shop}</h4><span class="text-xs font-bold text-teal-brand">${o.status}</span></div>
+                                        <p class="text-xs text-gray-400">ઓર્ડર ID: ${o.id} • ${o.date}</p>
+                                        <p class="text-sm font-bold text-navy mt-2">કુલ: ₹${o.amount}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'profile':
+                    return `
+                        <div class="flex-1 bg-white p-6 pb-24">
+                            <div class="flex items-center space-x-4 mb-6">
+                                <div class="w-16 h-16 bg-teal-brand text-white rounded-full flex items-center justify-center font-bold text-2xl shadow">ND</div>
+                                <div>
+                                    <h3 class="font-bold text-navy text-lg">Nileshbhai Dabhi</h3>
+                                    <p class="text-xs text-gray-500">+91 ${state.mobileNumber || '9876543210'}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div onclick="switchScreen('orders')" class="p-4 bg-gray-50 rounded-2xl font-semibold text-sm text-navy flex justify-between items-center cursor-pointer"><span>મારા ઓર્ડર</span><i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i></div>
+                                <div onclick="switchScreen('location')" class="p-4 bg-gray-50 rounded-2xl font-semibold text-sm text-navy flex justify-between items-center cursor-pointer"><span>શહેર બદલો (${state.selectedCity})</span><i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i></div>
+                                <div onclick="switchScreen('splash')" class="p-4 bg-rose-50 text-rose-600 rounded-2xl font-semibold text-sm flex justify-between items-center cursor-pointer"><span>લોગ આઉટ</span><i class="fa-solid fa-right-from-bracket text-xs"></i></div>
+                            </div>
+                        </div>
+                    `;
+
+                default:
+                    return `<div class="p-6">પેજ મળ્યું નથી</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
+
