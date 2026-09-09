@@ -38,17 +38,11 @@
             width: 100%;
             max-width: 480px;
             height: 100%;
-            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+            background: #f8fafc;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
-        }
-
-        .app-bg-pattern {
-            background-image: radial-gradient(#00A88F 0.8px, transparent 0.8px), radial-gradient(#12304A 0.8px, #f8fafc 0.8px);
-            background-size: 28px 28px;
-            background-position: 0 0, 14px 14px;
         }
 
         .ticker-wrap {
@@ -82,7 +76,7 @@
         
         <!-- TOP STATUS BAR -->
         <div class="bg-navy text-white px-4 py-2 text-xs flex justify-between items-center z-50 shrink-0">
-            <span id="current-time">1:52</span>
+            <span id="current-time">2:00</span>
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-signal text-[10px]"></i>
                 <i class="fa-solid fa-wifi text-[10px]"></i>
@@ -91,7 +85,7 @@
         </div>
 
         <!-- APP CONTENT AREA -->
-        <div id="screen-viewport" class="flex-1 overflow-y-auto no-scrollbar relative flex flex-col app-bg-pattern" style="padding-bottom: 95px;">
+        <div id="screen-viewport" class="flex-1 overflow-y-auto no-scrollbar relative flex flex-col" style="padding-bottom: 95px;">
             <!-- Dynamic Screen Injected Here -->
         </div>
 
@@ -197,7 +191,7 @@
             switch(name) {
                 case 'splash':
                     return `
-                        <div class="flex-1 bg-navy flex flex-col justify-between items-center p-8 text-white text-center h-full w-full absolute inset-0 z-50">
+                        <div class="flex-1 bg-navy flex flex-col justify-between items-center p-6 text-white text-center h-full w-full absolute inset-0 z-50">
                             <div></div>
                             <div class="flex flex-col items-center">
                                 <div class="w-24 h-24 bg-teal-brand rounded-3xl flex items-center justify-center shadow-xl relative mb-6">
@@ -209,7 +203,7 @@
                                 <h1 class="text-3xl font-bold tracking-wider mb-2">CITY MITRA</h1>
                                 <p class="text-yellow-brand text-lg font-medium">“તમારા શહેરનો, તમારો મિત્ર.”</p>
                             </div>
-                            <button onclick="switchScreen('location')" class="w-full bg-teal-brand text-white py-4 rounded-2xl font-bold text-lg shadow-lg">
+                            <button onclick="switchScreen('location')" class="w-full bg-teal-brand text-white py-3.5 rounded-2xl font-bold text-base shadow-lg mb-4">
                                 આગળ વધો <i class="fa-solid fa-arrow-right ml-2"></i>
                             </button>
                         </div>
@@ -225,7 +219,7 @@
                                 <h2 class="text-xl font-bold text-navy mb-1">તમારું શહેર પસંદ કરો</h2>
                                 <p class="text-gray-500 text-xs mb-5">તમારા સ્થાનિક વિસ્તારની શ્રેષ્ઠ સેવાઓ મેળવવા માટે.</p>
                                 <div class="space-y-3">
-                                    <div onclick="state.selectedCity='Talaja'; switchScreen('login')" class="p-4 border-2 border-teal-brand bg-teal-50/90 rounded-2xl flex items-center justify-between cursor-pointer shadow-sm">
+                                    <div onclick="state.selectedCity='Talaja'; switchScreen('login')" class="p-4 border-2 border-teal-brand bg-teal-50 rounded-2xl flex items-center justify-between cursor-pointer shadow-sm">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-10 h-10 bg-teal-brand text-white rounded-xl flex items-center justify-center"><i class="fa-solid fa-location-dot"></i></div>
                                             <div>
@@ -235,7 +229,7 @@
                                         </div>
                                         <i class="fa-solid fa-circle-check text-teal-brand text-lg"></i>
                                     </div>
-                                    <div onclick="state.selectedCity='Bhavnagar'; switchScreen('login')" class="p-4 border border-gray-200 bg-white/90 rounded-2xl flex items-center justify-between cursor-pointer">
+                                    <div onclick="state.selectedCity='Bhavnagar'; switchScreen('login')" class="p-4 border border-gray-200 bg-white rounded-2xl flex items-center justify-between cursor-pointer">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-10 h-10 bg-gray-200 text-gray-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-city"></i></div>
                                             <div>
@@ -318,320 +312,4 @@
                                 <div class="grid grid-cols-4 gap-2.5 mb-4">
                                     <div onclick="switchScreen('category')" class="flex flex-col items-center cursor-pointer bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
                                         <div class="bg-teal-50 text-teal-brand rounded-xl flex items-center justify-center text-lg mb-1" style="width:44px; height:44px;"><i class="fa-solid fa-basket-shopping"></i></div>
-                                        <span class="text-[11px] font-semibold text-gray-700">ગ્રોસરી</span>
-                                    </div>
-                                    <div onclick="switchScreen('food')" class="flex flex-col items-center cursor-pointer bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                        <div class="bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center text-lg mb-1" style="width:44px; height:44px;"><i class="fa-solid fa-utensils"></i></div>
-                                        <span class="text-[11px] font-semibold text-gray-700">ફૂડ</span>
-                                    </div>
-                                    <div onclick="switchScreen('auto')" class="flex flex-col items-center cursor-pointer bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                        <div class="bg-yellow-50 text-amber-600 rounded-xl flex items-center justify-center text-lg mb-1" style="width:44px; height:44px;"><i class="fa-solid fa-taxi"></i></div>
-                                        <span class="text-[11px] font-semibold text-gray-700">ઓટો</span>
-                                    </div>
-                                    <div onclick="switchScreen('car')" class="flex flex-col items-center cursor-pointer bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                        <div class="bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-lg mb-1" style="width:44px; height:44px;"><i class="fa-solid fa-car-side"></i></div>
-                                        <span class="text-[11px] font-semibold text-gray-700">કાર કેબ</span>
-                                    </div>
-                                    <div onclick="switchScreen('parcel')" class="flex flex-col items-center cursor-pointer bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                        <div class="bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-lg mb-1" style="width:44px; height:44px;"><i class="fa-solid fa-box-archive"></i></div>
-                                        <span class="text-[11px] font-semibold text-gray-700">પાર્સલ</span>
-                                    </div>
-                                    <div onclick="switchScreen('shop-list')" class="flex flex-col items-center cursor-pointer bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                        <div class="bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center text-lg mb-1" style="width:44px; height:44px;"><i class="fa-solid fa-shop"></i></div>
-                                        <span class="text-[11px] font-semibold text-gray-700">લોકલ શોપ</span>
-                                    </div>
-                                    <div onclick="switchScreen('category')" class="flex flex-col items-center cursor-pointer bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                        <div class="bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg mb-1" style="width:44px; height:44px;"><i class="fa-solid fa-pills"></i></div>
-                                        <span class="text-[11px] font-semibold text-gray-700">મેડિસિન</span>
-                                    </div>
-                                    <div onclick="switchScreen('offers')" class="flex flex-col items-center cursor-pointer bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                        <div class="bg-pink-50 text-pink-600 rounded-xl flex items-center justify-center text-lg mb-1" style="width:44px; height:44px;"><i class="fa-solid fa-gift"></i></div>
-                                        <span class="text-[11px] font-semibold text-gray-700">ઓફર્સ</span>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center mb-2.5">
-                                    <h3 class="font-bold text-navy text-sm">નજીકની લોકપ્રિય દુકાનો</h3>
-                                    <span onclick="switchScreen('shop-list')" class="text-xs font-bold text-teal-brand cursor-pointer">બ બધું જુઓ</span>
-                                </div>
-                                <div class="space-y-2.5">
-                                    <div onclick="switchScreen('shop-details')" class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-3 cursor-pointer">
-                                        <div class="w-12 h-12 bg-teal-100 text-teal-brand rounded-xl flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-store"></i></div>
-                                        <div class="flex-1">
-                                            <div class="flex justify-between items-start">
-                                                <h4 class="font-bold text-navy text-xs">પાટીદાર જનરલ સ્ટોર</h4>
-                                                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">૪.૮ ★</span>
-                                            </div>
-                                            <p class="text-[11px] text-gray-500 mt-0.5">કરિયાણું અને ડેઈલી નીડ્સ</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                case 'search':
-                    return `
-                        <div class="p-4">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
-                                <div class="flex-1 bg-white rounded-2xl px-4 py-2.5 flex items-center space-x-3 shadow-sm border">
-                                    <i class="fa-solid fa-magnifying-glass text-teal-brand"></i>
-                                    <input type="text" placeholder="ગ્રોસરી, દુકાન કે ફૂડ શોધો..." autofocus class="w-full bg-transparent outline-none text-xs text-navy">
-                                </div>
-                            </div>
-                            <h4 class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">તાજેતરની શોધ</h4>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="bg-white border text-gray-700 text-xs font-medium px-3 py-1.5 rounded-xl shadow-sm">સીંગતેલ</span>
-                                <span class="bg-white border text-gray-700 text-xs font-medium px-3 py-1.5 rounded-xl shadow-sm">ચા પત્તી</span>
-                            </div>
-                        </div>
-                    `;
-                case 'category':
-                    return `
-                        <div class="p-4">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
-                                <h2 class="text-base font-bold text-navy">ગ્રોસરી અને દૈનિક જરૂરિયાત</h2>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div onclick="switchScreen('product-details')" class="bg-white p-3 rounded-2xl border border-gray-100 flex flex-col justify-between cursor-pointer shadow-sm">
-                                    <div>
-                                        <div class="w-full h-24 bg-amber-100 rounded-xl flex items-center justify-center text-amber-700 text-2xl mb-2"><i class="fa-solid fa-bottle-droplet"></i></div>
-                                        <h4 class="font-bold text-navy text-xs mb-1">શુદ્ધ સીંગતેલ (1 Ltr)</h4>
-                                    </div>
-                                    <div class="flex items-center justify-between mt-2">
-                                        <span class="font-bold text-teal-brand text-xs">₹160</span>
-                                        <button onclick="event.stopPropagation(); alert('કાર્ટમાં ઉમેરાયું!');" class="bg-teal-brand text-white w-7 h-7 rounded-lg flex items-center justify-center shadow"><i class="fa-solid fa-plus text-xs"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                case 'shop-list':
-                    return `
-                        <div class="p-4">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
-                                <h2 class="text-base font-bold text-navy">તલાજાની સ્થાનિક દુકાનો</h2>
-                            </div>
-                            <div onclick="switchScreen('shop-details')" class="p-3 bg-white rounded-2xl border border-gray-100 flex items-center space-x-3 cursor-pointer shadow-sm">
-                                <div class="w-12 h-12 bg-teal-brand text-white rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-store"></i></div>
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-center"><h4 class="font-bold text-navy text-xs">પાટીદાર જનરલ સ્ટોર</h4><span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">ઓપન</span></div>
-                                    <p class="text-[11px] text-gray-500 mt-0.5">કરિયાણું અને ડેઈલી નીડ્સ</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                case 'shop-details':
-                    return `
-                        <div class="p-4">
-                            <button onclick="switchScreen('shop-list')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                            <h2 class="text-base font-bold text-navy mb-0.5">પાટીદાર જનરલ સ્ટોર</h2>
-                            <p class="text-[11px] text-gray-400 mb-4">મેઈન બજાર, તલાજા • ૪.૮ ★</p>
-                            <div class="space-y-2">
-                                <div class="bg-white p-3 rounded-xl flex items-center justify-between shadow-sm border">
-                                    <div><h4 class="font-bold text-xs text-navy">શુદ્ધ સીંગતેલ (1 Ltr)</h4><p class="text-[11px] font-bold text-teal-brand">₹160</p></div>
-                                    <button onclick="alert('કાર્ટમાં ઉમેરાયું!');" class="bg-teal-brand text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">ઉમેરો</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                case 'product-details':
-                    return `
-                        <div class="p-4 flex flex-col justify-between h-full">
-                            <div>
-                                <button onclick="switchScreen('category')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                                <div class="w-full h-36 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-700 text-4xl mb-4 shadow-sm"><i class="fa-solid fa-bottle-droplet"></i></div>
-                                <h2 class="text-base font-bold text-navy mb-1">શુદ્ધ સીંગતેલ (1 Ltr)</h2>
-                                <p class="text-xs text-teal-brand font-bold mb-2">₹160</p>
-                                <p class="text-[11px] text-gray-600">૧૦૦% શુદ્ધ અને ગુણવત્તાસભર સીંગતેલ, સીધું તમારા ઘર સુધી.</p>
-                            </div>
-                            <button onclick="alert('કાર્ટમાં ઉમેરાયું!'); switchScreen('cart');" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow mt-4">કાર્ટમાં ઉમેરો</button>
-                        </div>
-                    `;
-                case 'cart':
-                    return `
-                        <div class="p-4 flex flex-col justify-between h-full">
-                            <div>
-                                <div class="flex items-center space-x-3 mb-4">
-                                    <button onclick="switchScreen('home')" class="text-navy text-lg"><i class="fa-solid fa-arrow-left"></i></button>
-                                    <h2 class="text-base font-bold text-navy">તમારું કાર્ટ</h2>
-                                </div>
-                                <div class="space-y-2.5 mb-4">
-                                    ${state.cart.map(item => `
-                                        <div class="bg-white p-3 rounded-xl flex items-center justify-between border shadow-sm">
-                                            <div><h4 class="font-bold text-xs text-navy">${item.name}</h4><p class="text-[11px] text-teal-brand font-bold">₹${item.price}</p></div>
-                                            <span class="font-bold text-xs bg-gray-100 px-2.5 py-1 rounded">Qty: ${item.qty}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <div class="bg-white p-3 rounded-xl border text-xs space-y-1 shadow-sm">
-                                    <div class="flex justify-between"><span>કુલ રકમ</span><span class="font-bold">₹370</span></div>
-                                </div>
-                            </div>
-                            <button onclick="switchScreen('checkout')" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow mt-4">ઓર્ડર કન્ફર્મ કરો</button>
-                        </div>
-                    `;
-                case 'checkout':
-                    return `
-                        <div class="p-4 flex flex-col justify-between h-full">
-                            <div>
-                                <button onclick="switchScreen('cart')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                                <h2 class="text-base font-bold text-navy mb-3">ડિલિવરી સરનામું</h2>
-                                <div class="bg-teal-50 border-2 border-teal-brand p-3 rounded-2xl text-xs">
-                                    <p class="font-bold text-teal-brand mb-1">ઘરનું સરનામું (Home)</p>
-                                    <p class="text-gray-600 text-[11px]">સોસાયટી નંબર ૪, તલાજા - 364140</p>
-                                </div>
-                            </div>
-                            <button onclick="switchScreen('payment')" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow">પેમેન્ટ પર જાઓ</button>
-                        </div>
-                    `;
-                case 'payment':
-                    return `
-                        <div class="p-4 flex flex-col justify-between h-full">
-                            <div>
-                                <button onclick="switchScreen('checkout')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                                <h2 class="text-base font-bold text-navy mb-3">પેમેન્ટ પદ્ધતિ</h2>
-                                <label class="flex items-center justify-between p-3 bg-white rounded-2xl border-2 border-teal-brand cursor-pointer text-xs font-bold shadow-sm">
-                                    <span>Cash on Delivery (COD)</span>
-                                    <input type="radio" checked name="pay" class="accent-teal-brand">
-                                </label>
-                            </div>
-                            <button onclick="switchScreen('order-confirmation')" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow">ઓર્ડર પ્લેસ કરો (₹370)</button>
-                        </div>
-                    `;
-                case 'order-confirmation':
-                    return `
-                        <div class="p-5 flex flex-col justify-center items-center text-center h-full">
-                            <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mb-3 shadow"><i class="fa-solid fa-check"></i></div>
-                            <h2 class="text-lg font-bold text-navy mb-1">ઓર્ડર સફળ!</h2>
-                            <p class="text-xs text-gray-500 mb-5">ઓર્ડર નંબર: #CM-8921<br>તલાજામાં ટૂંક સમયમાં ડિલિવરી થશે.</p>
-                            <button onclick="switchScreen('home')" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow">હોમ પર જાઓ</button>
-                        </div>
-                    `;
-                case 'auto':
-                    return `
-                        <div class="p-4 flex flex-col justify-between h-full">
-                            <div>
-                                <button onclick="switchScreen('home')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                                <h2 class="text-base font-bold text-navy mb-3">ઓટો-રિક્ષા બુકિંગ</h2>
-                                <div class="space-y-2.5">
-                                    <input type="text" value="તલાજા બસ સ્ટેન્ડ" class="w-full bg-white p-3 rounded-xl border text-xs outline-none shadow-sm">
-                                    <input type="text" placeholder="ડ્રોપ લોકેશન" class="w-full bg-white p-3 rounded-xl border text-xs outline-none shadow-sm">
-                                </div>
-                            </div>
-                            <button onclick="switchScreen('driver-matching')" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow">ઓટો બુક કરો (₹50)</button>
-                        </div>
-                    `;
-                case 'car':
-                    return `
-                        <div class="p-4 flex flex-col justify-between h-full">
-                            <div>
-                                <button onclick="switchScreen('home')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                                <h2 class="text-base font-bold text-navy mb-3">કાર / કેબ બુકિંગ</h2>
-                                <input type="text" value="તલાજા થી ભાવનગર" class="w-full bg-white p-3 rounded-xl border text-xs outline-none shadow-sm">
-                            </div>
-                            <button onclick="switchScreen('driver-matching')" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow">કેબ બુક કરો (₹550)</button>
-                        </div>
-                    `;
-                case 'driver-matching':
-                    return `
-                        <div class="p-4 flex flex-col justify-center items-center text-center h-full">
-                            <div class="w-14 h-14 bg-teal-100 text-teal-brand rounded-full flex items-center justify-center text-xl mb-3 animate-spin shadow"><i class="fa-solid fa-radar"></i></div>
-                            <h2 class="text-base font-bold text-navy mb-1">ડ્રાઈવરની શોધ ચાલુ છે...</h2>
-                            <button onclick="switchScreen('live-ride')" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow mt-5">ડ્રાઈવર મળી ગયો (ટેસ્ટ)</button>
-                        </div>
-                    `;
-                case 'live-ride':
-                    return `
-                        <div class="p-4 flex flex-col justify-between h-full">
-                            <div>
-                                <button onclick="switchScreen('home')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                                <h2 class="text-base font-bold text-navy mb-3">રાઇડ ચાલુ છે</h2>
-                                <div class="bg-white p-3 rounded-xl border text-xs shadow-sm">
-                                    <p class="font-bold">મહેશભાઈ (ડ્રાઈવર)</p>
-                                    <p class="text-gray-500 text-[11px]">GJ-04-AB-1234</p>
-                                </div>
-                            </div>
-                            <button onclick="switchScreen('ride-completed')" class="w-full bg-rose-500 text-white py-3 rounded-xl font-bold text-xs shadow">રાઇડ પૂર્ણ કરો</button>
-                        </div>
-                    `;
-                case 'ride-completed':
-                    return `
-                        <div class="p-5 flex flex-col justify-center items-center text-center h-full">
-                            <h2 class="text-lg font-bold text-navy mb-1">રાઇડ સફળ!</h2>
-                            <button onclick="switchScreen('home')" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow mt-4">હોમ પર જાઓ</button>
-                        </div>
-                    `;
-                case 'parcel':
-                    return `
-                        <div class="p-4 flex flex-col justify-between h-full">
-                            <div>
-                                <button onclick="switchScreen('home')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                                <h2 class="text-base font-bold text-navy mb-3">પાર્સલ ડિલિવરી</h2>
-                                <input type="text" placeholder="પિક-અપ સરનામું" class="w-full bg-white p-3 rounded-xl border text-xs outline-none mb-2.5 shadow-sm">
-                                <input type="text" placeholder="ડ્રોપ સરનામું" class="w-full bg-white p-3 rounded-xl border text-xs outline-none shadow-sm">
-                            </div>
-                            <button onclick="alert('પાર્સલ બુક થઈ ગયું!'); switchScreen('home');" class="w-full bg-teal-brand text-white py-3 rounded-xl font-bold text-xs shadow">પાર્સલ બુક કરો</button>
-                        </div>
-                    `;
-                case 'food':
-                    return `
-                        <div class="p-4">
-                            <button onclick="switchScreen('home')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                            <h2 class="text-base font-bold text-navy mb-3">ફૂડ અને રેસ્ટોરન્ટ</h2>
-                            <div onclick="switchScreen('shop-details')" class="bg-white p-3 rounded-2xl border text-xs shadow-sm">
-                                <p class="font-bold text-navy">કાઠિયાવાડી ડાઈનિંગ</p>
-                                <p class="text-gray-500 text-[11px]">સ્ટેશન રોડ, તલાજા</p>
-                            </div>
-                        </div>
-                    `;
-                case 'offers':
-                    return `
-                        <div class="p-4">
-                            <button onclick="switchScreen('home')" class="text-navy text-lg mb-3"><i class="fa-solid fa-arrow-left"></i></button>
-                            <h2 class="text-base font-bold text-navy mb-3">ખાસ ઓફર્સ</h2>
-                            <div class="bg-gradient-to-r from-teal-brand to-emerald-600 p-4 rounded-2xl text-white text-xs shadow-md">
-                                <p class="font-bold text-sm">WELCOME50</p>
-                                <p class="mt-1 text-[11px]">તલાજાના કોઈપણ ઓર્ડર પર પ્રથમ ઓર્ડર પર ₹૫૦ છૂટ.</p>
-                            </div>
-                        </div>
-                    `;
-                case 'orders':
-                    return `
-                        <div class="p-4">
-                            <h2 class="text-base font-bold text-navy mb-3">ઓર્ડર ઇતિહાસ</h2>
-                            <div class="space-y-2">
-                                ${state.orders.map(o => `
-                                    <div class="bg-white p-3 rounded-xl border text-xs shadow-sm">
-                                        <div class="flex justify-between font-bold mb-1"><span>${o.type}</span><span class="text-teal-brand">${o.status}</span></div>
-                                        <p class="text-gray-500 text-[11px]">${o.shop} • ₹${o.amount}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                case 'profile':
-                    return `
-                        <div class="p-4">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="w-12 h-12 bg-teal-brand text-white rounded-full flex items-center justify-center font-bold text-lg shadow">ND</div>
-                                <div>
-                                    <h3 class="font-bold text-navy text-sm">Nileshbhai Dabhi</h3>
-                                    <p class="text-[11px] text-gray-500">+91 ${state.mobileNumber || '9876543210'}</p>
-                                </div>
-                            </div>
-                            <div class="space-y-2 text-xs">
-                                <div onclick="switchScreen('orders')" class="p-3 bg-white rounded-xl font-bold flex justify-between items-center border cursor-pointer shadow-sm"><span>મારા ઓર્ડર</span><i class="fa-solid fa-chevron-right text-gray-400"></i></div>
-                                <div onclick="switchScreen('location')" class="p-3 bg-white rounded-xl font-bold flex justify-between items-center border cursor-pointer shadow-sm"><span>શહેર બદલો (${state.selectedCity})</span><i class="fa-solid fa-chevron-right text-gray-400"></i></div>
-                                <div onclick="switchScreen('splash')" class="p-3 bg-rose-50 text-rose-600 rounded-xl font-bold flex justify-between items-center border cursor-pointer shadow-sm"><span>લોગ આઉટ</span><i class="fa-solid fa-right-from-bracket"></i></div>
-                            </div>
-                        </div>
-                    `;
-                default:
-                    return `<div class="p-4">પેજ મળ્યું નથી</div>`;
-            }
-        }
-    </script>
-</body>
-</html>
+                                        <span class="text-[11px] font-semibold text-gra
